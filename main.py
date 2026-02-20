@@ -31,8 +31,12 @@ def get_weather():
     """获取彩云天气数据"""
     url = f"https://api.caiyunapp.com/v2.6/{caiyun_token}/{longitude},{latitude}/weather?dailysteps=3&hourlysteps=48"
     try:
-        res = requests.get(url, timeout=10).json()
-        if res.get("status") != "ok":
+        response = requests.get(url, timeout=10)
+        data = response.json()
+        print(f"DEBUG - API返回状态: {data.get('status')}") # 添加这一行来查错
+        
+        if data.get("status") != "ok":
+            print(f"DEBUG - 错误详情: {data}") # 如果失败，打印出具体原因
             return "获取失败", "获取失败", "获取失败", "获取失败"
         
         result = res["result"]
