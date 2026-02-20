@@ -1,43 +1,44 @@
-# name属性用来指定这个工作流的名字
-name: PUSH MESSAGE
+name: morning
 
-# 这个部分用来指定能够触发工作流执行的事件
 on:
-  # 当对分支main进行push操作的时候，这个工作流就被触发了
-#   push:
   schedule:
-  # 定时任务，在每天的5点推送天气信息到邮箱
+    # 每天北京时间早上 7:50 自动执行 (UTC 23:50)
     - cron: '50 23 * * *'
-  workflow_dispatch:
+  workflow_dispatch: # 这个一定要留着，方便你手动点按钮测试
 
-
-
-# 工作流是由一个或多个的jobs构成的，在jobs里来说明要交给GitHub aciton执行的任务
 jobs:
-  # 这个jobs中的一个任务，名字叫build(随便怎么取)
   send_message:
-  #这里说明的运行环境
     runs-on: ubuntu-latest
     name: send morning to your girlfriend
 
     steps:
-    - name: checkout
-      uses: actions/checkout@v3
-      with:
-        ref: master
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          ref: master
 
-    - name: sender
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-        architecture: 'x64'
-    - run: pip install -r ./requirements.txt && python ./main.py
+      - name: setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
-    env:
-      APP_ID: ${{ secrets.APP_ID }}
-      APP_SECRET: ${{ secrets.APP_SECRET }}
-      TEMPLATE_ID: ${{ secrets.TEMPLATE_ID }}
-      USER_ID: ${{ secrets.USER_ID }}
-      START_DATE: ${{ secrets.START_DATE }}
-      BIRTHDAY: ${{ secrets.BIRTHDAY }}
-      CITY: ${{ secrets.CITY }}
+      - name: Install dependencies and run
+        run: |
+          pip install -r ./requirements.txt
+          python ./main.py
+        env:
+          # 1. 微信配置
+          APP_ID: ${{ secrets.APP_ID }}
+          APP_SECRET: ${{ secrets.APP_SECRET }}
+          TEMPLATE_ID: ${{ secrets.TEMPLATE_ID }}
+          USER_ID: ${{ secrets.USER_ID }}
+          
+          # 2. 个人信息
+          START_DATE: ${{ secrets.START_DATE }}
+          BIRTHDAY: ${{ secrets.BIRTHDAY }}
+          
+          # 3. 彩云天气核心密钥 (必须在 Secrets 里添加此项)
+          CAIYUN_TOKEN: ${{ secrets.CAIYUN_TOKEN }}
+          
+          # 4. 备用变量 (如果代码没用到可以不管)
+          CITY: ${{ secrets.CITY }}
